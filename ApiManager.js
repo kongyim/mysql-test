@@ -3,6 +3,7 @@ var mysql = require('mysql');
 var log4js = require('log4js');
 var _ = require('lodash');
 var path = require('path');
+var Q = require('q');
 
 class ApiManager {
 
@@ -21,13 +22,27 @@ class ApiManager {
   }
 
   getResourceList(req, res, next) {
-    let sql = `select * from information_schema.tables where table_type = 'BASE TABLE';`
-    req.connection.query(sql, (err, result)=> {
-      if (err) return res.status(500).send(err);
-      if (!result) return res.sendStatus(404)
-      res.send(result)
-    });
-    req.connection.end();
+    let schema = {}
+    Q()
+      .then(()=>{
+        let sql = `select * from information_schema.tables where table_type = 'BASE TABLE'`
+        return Q.ninvoke(req.connection, "query", sql);
+      })
+      .spread((result)=>{
+        return Q.all(_.map(result, (item)=>{
+          let sql = `desc ${item.TABLE_NAME}`
+          return Q.ninvoke(req.connection, "query", sql).spread(list => schema[item.TABLE_NAME] = list );
+        }))
+        .then(result=>{
+          res.send(schema)
+        })
+      })
+      .catch(error=> {
+        return res.status(500).send(err);
+      })
+      .then(()=>{
+        req.connection.end();
+      })
   }
 
   getResource(req, res, next) {
