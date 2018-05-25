@@ -16,7 +16,7 @@ class ApiManager {
   createConnection(req, res, next){
     req.connection = mysql.createConnection(this.config);
     req.connection.connect(error=>{
-      if (error) return res.status(500).send(err)
+      if (error) return res.status(500).send(error)
       next();
     })
   }
@@ -38,7 +38,7 @@ class ApiManager {
         })
       })
       .catch(error=> {
-        return res.status(500).send(err);
+        return res.status(500).send(error);
       })
       .then(()=>{
         req.connection.end();
@@ -46,20 +46,30 @@ class ApiManager {
   }
 
   getResource(req, res, next) {
-    let sql = `select * from ${req.params.resource}`
-    req.connection.query(sql, (err, result)=> {
-      if (err) return res.status(500).send(err);
-      if (req.query) {
-        result = _.filter(result, req.query )
-      }
-      if (req.params.id) {
-        result = _.find(result, {id: parseInt(req.params.id)} )
-      }
+    Q()
+      .then(()=>{
+        let sql = `select * from ${req.params.resource}`
+        return Q.ninvoke(req.connection, "query", sql);
+      })
+      .spread((result)=>{
+        if (error) return res.status(500).send(error);
+        if (req.query) {
+          result = _.filter(result, req.query )
+        }
+        if (req.params.id) {
+          result = _.find(result, {id: parseInt(req.params.id)} )
+        }
 
-      if (!result) return res.sendStatus(404)
-      res.send(result)
-    });
-    req.connection.end();
+        if (!result) return res.sendStatus(404)
+        res.send(result)
+      })
+      .catch(error=> {
+        return res.status(500).send(error);
+      })
+      .then(()=>{
+        req.connection.end();
+      })
+
   }
 
   initRoutes() {
