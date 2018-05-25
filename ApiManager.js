@@ -182,10 +182,10 @@ class ApiManager {
   initRoutes() {
     this.app.use(bodyParser.json())
     this.app.get(`/`, this.validateInput.bind(this), this.createConnection.bind(this), this.getResourceList.bind(this) )
-    this.app.get(`/:resource/:id?`, this.validateInput.bind(this), this.createConnection.bind(this), this.getResource.bind(this) )
-    this.app.post(`/:resource`, this.validateInput.bind(this), this.createConnection.bind(this), this.createResource.bind(this) )
-    this.app.delete(`/:resource/:id?`, this.validateInput.bind(this), this.createConnection.bind(this), this.removeResource.bind(this) )
-    this.app.put(`/:resource/:id`, this.validateInput.bind(this), this.createConnection.bind(this), this.updateResource.bind(this) )
+    this.app.get(`/api/:resource/:id?`, this.validateInput.bind(this), this.createConnection.bind(this), this.getResource.bind(this) )
+    this.app.post(`/api/:resource`, this.validateInput.bind(this), this.createConnection.bind(this), this.createResource.bind(this) )
+    this.app.delete(`/api/:resource/:id?`, this.validateInput.bind(this), this.createConnection.bind(this), this.removeResource.bind(this) )
+    this.app.put(`/api/:resource/:id`, this.validateInput.bind(this), this.createConnection.bind(this), this.updateResource.bind(this) )
   }
 }
 

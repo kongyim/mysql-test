@@ -16,15 +16,15 @@ node server.js
 
 1. http://localhost:8080/
 
-1. http://localhost:8080/user
+1. http://localhost:8080/api/user
 
-1. http://localhost:8080/user/2
+1. http://localhost:8080/api/user/2
 
-1. http://localhost:8080/country
+1. http://localhost:8080/api/country
 
-1. http://localhost:8080/country/4
+1. http://localhost:8080/api/country/4
 
-1. http://localhost:8080/country?type=A
+1. http://localhost:8080/api/country?type=A
 
 ## override configuration
 default config.json file will created if you start the service in the first time.
