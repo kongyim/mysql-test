@@ -6,7 +6,6 @@ var path = require('path');
 
 var fs = require('fs-extra');
 
-
 var pkg = require('./package.json');
 
 let logger = log4js.getLogger();

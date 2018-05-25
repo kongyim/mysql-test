@@ -14,9 +14,15 @@ node server.js
 
 ## testing link
 
-http://localhost:8080/user
+1. http://localhost:8080/user
 
-http://localhost:8080/country
+1. http://localhost:8080/user/2
+
+1. http://localhost:8080/country
+
+1. http://localhost:8080/country/4
+
+1. http://localhost:8080/country?type=A
 
 ## override configuration
 default config.json file will created if you start the service in the first time.
