@@ -21,7 +21,7 @@ class ApiManager {
   }
 
   getResourceList(req, res, next) {
-    let sql = `select * from information_schema.tables where TABLE_SCHEMA='${this.config.database}'`
+    let sql = `select * from information_schema.tables where table_type = 'BASE TABLE';`
     req.connection.query(sql, (err, result)=> {
       if (err) return res.status(500).send(err);
       if (!result) return res.sendStatus(404)
