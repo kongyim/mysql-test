@@ -53,17 +53,21 @@ class ApiManager {
   getResource(req, res, next) {
     Q()
       .then(()=>{
-        let sql = squel.select()
-                    .from(req.params.resource)
-                    .toString()
+        let sql = squel.select().from(req.params.resource)
+        if (req.query) {
+          _.each(req.query, (value, key)=>{
+            sql = sql.where(`${key} = ?`, value)
+          })
+        }
+        if (req.params.id) {
+          sql = sql.where('id = ?', req.params.id)
+        }
+        sql = sql.toString();
         return Q.ninvoke(req.connection, "query", sql);
       })
       .spread(result=>{
-        if (req.query) {
-          result = _.filter(result, req.query )
-        }
         if (req.params.id) {
-          result = _.find(result, {id: parseInt(req.params.id)} )
+          result = _.head(result)
         }
 
         if (!result) return res.sendStatus(404)
@@ -105,7 +109,7 @@ class ApiManager {
         let sql = squel.update()
                     .table(req.params.resource)
                     .setFields(req.body)
-                    .where(`id = ${req.params.id}`)
+                    .where(`id = '${req.params.id}'`)
                     .toString()
         return Q.ninvoke(req.connection, "query", sql);
       })
@@ -115,7 +119,7 @@ class ApiManager {
       .then(()=>{
         let sql = squel.select()
                     .from(req.params.resource)
-                    .where(`id = ${req.params.id}`)
+                    .where(`id = '${req.params.id}'`)
                     .toString()
         return Q.ninvoke(req.connection, "query", sql);
       })
@@ -136,7 +140,7 @@ class ApiManager {
       .then(()=>{
         let sql = squel.delete()
                     .from(req.params.resource)
-                    .where(`id = ${req.params.id}`)
+                    .where(`id = '${req.params.id}'`)
                     .toString()
         return Q.ninvoke(req.connection, "query", sql);
       })
@@ -152,13 +156,36 @@ class ApiManager {
       })
   }
 
+  validateInput(req, res, next){
+    if (_.isString(req.params.id)) req.params.id = req.params.id.replace(/['"]/g, '');
+    if (_.isString(req.params.resource)) req.params.resource = req.params.resource.replace(/['"]/g, '');
+
+    _.each(req.query, (value, key)=>{
+      if(/['"]/.test(key)) {
+        delete req.query[key]
+      } else if(/['"]/.test(value)) {
+        req.query[key] = value.replace(/'/g, "\\'");
+      }
+    })
+
+    _.each(req.body, (value, key)=>{
+      if(/['"]/.test(key)) {
+        delete req.body[key]
+      } else if(/['"]/.test(value)) {
+        req.body[key] = value.replace(/'/g, "\\'");
+      }
+    })
+
+    next()
+  }
+
   initRoutes() {
     this.app.use(bodyParser.json())
-    this.app.get(`/`, this.createConnection.bind(this), this.getResourceList.bind(this) )
-    this.app.get(`/:resource/:id?`, this.createConnection.bind(this), this.getResource.bind(this) )
-    this.app.post(`/:resource`, this.createConnection.bind(this), this.createResource.bind(this) )
-    this.app.delete(`/:resource/:id?`, this.createConnection.bind(this), this.removeResource.bind(this) )
-    this.app.put(`/:resource/:id`, this.createConnection.bind(this), this.updateResource.bind(this) )
+    this.app.get(`/`, this.validateInput.bind(this), this.createConnection.bind(this), this.getResourceList.bind(this) )
+    this.app.get(`/:resource/:id?`, this.validateInput.bind(this), this.createConnection.bind(this), this.getResource.bind(this) )
+    this.app.post(`/:resource`, this.validateInput.bind(this), this.createConnection.bind(this), this.createResource.bind(this) )
+    this.app.delete(`/:resource/:id?`, this.validateInput.bind(this), this.createConnection.bind(this), this.removeResource.bind(this) )
+    this.app.put(`/:resource/:id`, this.validateInput.bind(this), this.createConnection.bind(this), this.updateResource.bind(this) )
   }
 }
 
