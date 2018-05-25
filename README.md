@@ -14,6 +14,8 @@ node server.js
 
 ## testing link
 
+1. http://localhost:8080/
+
 1. http://localhost:8080/user
 
 1. http://localhost:8080/user/2
