@@ -20,6 +20,16 @@ class ApiManager {
     })
   }
 
+  getResourceList(req, res, next) {
+    let sql = `select * from information_schema.tables where TABLE_SCHEMA='${this.config.database}'`
+    req.connection.query(sql, (err, result)=> {
+      if (err) return res.status(500).send(err);
+      if (!result) return res.sendStatus(404)
+      res.send(result)
+    });
+    req.connection.end();
+  }
+
   getResource(req, res, next) {
     let sql = `select * from ${req.params.resource}`
     req.connection.query(sql, (err, result)=> {
@@ -38,6 +48,7 @@ class ApiManager {
   }
 
   initRoutes() {
+    this.app.get(`/`, this.createConnection.bind(this), this.getResourceList.bind(this) )
     this.app.get(`/:resource/:id?`, this.createConnection.bind(this), this.getResource.bind(this) )
   }
 }
