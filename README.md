@@ -14,7 +14,7 @@ node server.js
 
 ## testing link
 
-1. http://localhost:8080/
+1. http://localhost:8080/api/schema
 
 1. http://localhost:8080/api/user
 
